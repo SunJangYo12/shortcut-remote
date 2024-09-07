@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Controller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .button {
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button:active {
+            transform: scale(0.95);
+        }
+        .volume-control {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .volume-slider {
+            margin-top: 10px;
+            width: 100px; /* Adjust width for mobile */
+        }
+
+        /* Media Queries for Mobile Devices */
+        @media (max-width: 600px) {
+            .button {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            .volume-slider {
+                width: 80%; /* Adjust width for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <div class="controls">
+            <button class="button" onclick="sendCommand('prev')">&#9664;</button> <!-- Prev (Left Arrow) -->
+            <button class="button" onclick="sendCommand('playpause')">&#10074;&#10074;</button> <!-- Pause (Double Vertical Bars) -->
+            <button class="button" onclick="sendCommand('next')">&#9654;</button> <!-- Next (Right Arrow) -->
+        </div>
+        <div class="volume-control">
+            <button class="button" onclick="sendCommand('volumeup')">+</button> <!-- Volume Up (Speaker Icon) -->
+            <button class="button" onclick="sendCommand('volumedown')">-</button> <!-- Volume Down (Speaker Icon) -->
+            <input type="range" class="volume-slider" min="0" max="100" value="50" onchange="setVolume(this.value)">
+        </div>
+    </div>
+
+    <script>
+        // Request permission for notifications
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log('Notification permission status:', permission);
+            });
+        }
+
+        function sendCommand(command) {
+            fetch(`/control?command=${command}`, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    showNotification('Command executed', data.message);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function setVolume(volume) {
+            fetch(`/control?command=volume&value=${volume}`, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    showNotification('Volume adjusted', data.message);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function showNotification(title, message) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: message,
+                    icon: 'https://via.placeholder.com/150' // Replace with your own icon URL
+                });
+            }
+        }
+    </script>
+</body>
+</html>
