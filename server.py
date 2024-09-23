@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import pyautogui
 import json
+import os
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -10,7 +11,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             with open('index.html', 'r') as file:
                 self.wfile.write(file.read().encode('utf-8'))
+
+        elif self.path == '/image':
+            self.send_response(200)
+            self.send_header('Content-type', 'image/png')
+            self.end_headers()
+            with open('album.png', 'rb') as file:
+                self.wfile.write(file.read())
+
         elif self.path.startswith('/control'):
+            os.system("cp /tmp/audacious-* album.png")
             query = self.path.split('?')[1]
             params = dict(p.split('=') for p in query.split('&'))
 
